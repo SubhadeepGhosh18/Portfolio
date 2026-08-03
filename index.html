@@ -1188,7 +1188,7 @@
       height: 18px;
       flex-shrink: 0;
     }
-    .contact-right .contact-link-mini .resume-mini-image {
+    .contact-right .contact-link-mini img {
       width: 18px;
       height: 18px;
       object-fit: cover;
@@ -1295,51 +1295,71 @@
       .sec-head { flex-direction: column; align-items: flex-start; }
       .sec-side { margin-left: 0; }
     }
-    <style>
-    /* Mini contact buttons styling */
-    .contact-grid-mini {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 16px;
-    }
 
-    .contact-link-mini {
-      display: inline-flex;
+    /* ============ RESUME LIGHTBOX ============ */
+    .resume-lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(10, 10, 15, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: none;
       align-items: center;
-      gap: 10px;
-      padding: 12px 20px;            /* Generous padding for bigger targets */
-      font-size: 0.95rem;             /* Clearer text size */
-      font-weight: 500;
-      color: #e2e8f0;
-      background: rgba(255, 255, 255, 0.05); /* Soft glass aesthetic */
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 9999px;          /* Matching rounded pill shape */
-      text-decoration: none;
+      justify-content: center;
+      padding: 2rem;
+      opacity: 0;
+      transition: opacity 0.3s var(--easing);
+    }
+    .resume-lightbox.open {
+      display: flex;
+      opacity: 1;
+    }
+    .resume-lightbox-inner {
+      position: relative;
+      max-width: min(900px, 95vw);
+      max-height: 92vh;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--line-2);
+      background: var(--bg-elev);
+    }
+    .resume-lightbox-inner img {
+      display: block;
+      max-width: 100%;
+      max-height: 92vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+    }
+    .resume-lightbox-close {
+      position: absolute;
+      top: -52px;
+      right: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: var(--ink);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: all 0.25s var(--easing);
       backdrop-filter: blur(8px);
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
-
-    .contact-link-mini svg {
-      width: 20px;
-      height: 20px;
-      transition: transform 0.25s ease;
+    .resume-lightbox-close:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--bg);
+      transform: rotate(90deg);
     }
-
-    /* Hover effects */
-    .contact-link-mini:hover {
-      background: rgba(255, 255, 255, 0.12);
-      border-color: rgba(255, 255, 255, 0.35);
-      color: #ffffff;
-      transform: translateY(-2px);   /* Subtle lift */
-      box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.3);
+    .resume-lightbox-close svg {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2;
     }
-
-    .contact-link-mini:hover svg {
-      transform: scale(1.1);         /* Icon zoom */
-    }
-  </style>
-</head>
   </style>
 </head>
 <body>
@@ -1655,8 +1675,14 @@
         </svg>
         Instagram
       </a>
-      <a href="resume.jpg" target="_blank" rel="noopener" class="contact-link-mini contact-resume">
-        <img src="resume.jpg" alt="Resume preview" class="resume-mini-image" />
+      <a href="resume.jpg" target="_blank" rel="noopener" class="contact-link-mini contact-resume" id="resumeBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="8" y1="13" x2="16" y2="13"/>
+          <line x1="8" y1="17" x2="16" y2="17"/>
+          <line x1="8" y1="9" x2="10" y2="9"/>
+        </svg>
         Resume
       </a>
     </div>
@@ -1723,7 +1749,48 @@
     const el = document.getElementById(id);
     if (el) sectionObserver.observe(el);
   });
+
+  // Resume lightbox
+  const resumeBtn = document.getElementById('resumeBtn');
+  if (resumeBtn) {
+    resumeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const lb = document.getElementById('resumeLightbox');
+      if (lb) {
+        lb.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+    });
+  }
+
+  const resumeLightbox = document.getElementById('resumeLightbox');
+  if (resumeLightbox) {
+    const close = () => {
+      resumeLightbox.classList.remove('open');
+      document.body.style.overflow = '';
+    };
+    resumeLightbox.querySelector('.resume-lightbox-close').addEventListener('click', close);
+    resumeLightbox.addEventListener('click', (e) => {
+      if (e.target === resumeLightbox) close();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && resumeLightbox.classList.contains('open')) close();
+    });
+  }
 </script>
+
+<!-- Resume lightbox -->
+<div class="resume-lightbox" id="resumeLightbox" role="dialog" aria-modal="true" aria-label="Resume preview">
+  <div class="resume-lightbox-inner">
+    <button class="resume-lightbox-close" type="button" aria-label="Close resume preview">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+    <img src="resume.jpg" alt="Subhadeep Ghosh — Resume" />
+  </div>
+</div>
 
 </body>
 </html>
